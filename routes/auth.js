@@ -25,4 +25,26 @@ router.post('/signup', async (req, res) => {
   }
 })
 
+// Singin
+router.post('/signin', async (req, res) => {
+  try {
+    // find user by using User model and find one user with unique username
+    // try to find inside mongoDB
+    const user = await User.findOne({username: req.body.username})
+    // if there is no user in the mongoDB, respond with error wrong credentials
+    !user && res.status(400).json('Wrong credentials!')
+    // compare raw password with hashed password
+    const validated = await bcrypt.compare(req.body.password, user.password)
+    // if not validated, respond with error wrong credentials
+    !validated && res.status(400).json('Wrong credentials!')
+    // prevent hashed password from being sent to the user
+    const { password, ...others } = user._doc
+
+    // respond if success
+    res.status(200).json(others)
+  } catch (err) {
+    res.status(500).json(err)
+  }
+})
+
 module.exports = router
