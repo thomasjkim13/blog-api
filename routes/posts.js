@@ -83,11 +83,45 @@ router.delete('/:id', async (req, res) => {
 })
 
 // GET post
-router.get('/:id', async (req, res ) => {
+router.get('/:id', async (req, res) => {
   try {
     const post = await Post.findById(req.params.id)
     res.status(200).json(post)
   } catch (err) {
+    res.status(500).json(err)
+  }
+})
+
+// INDEX post
+// Fetch all posts
+router.get('/', async (req, res) => {
+  // req.query contains the URL query parameters
+  // get all posts of specific user using query.user
+  const username = req.query.user
+  // get all posts related to category using query.user
+  const catName = req.query.cat
+  try {
+    // create posts array to get the response
+    let posts
+    // if there is username
+    if (username) {
+      // find all posts with username
+      posts = await Post.find({ username })
+      // if there is categry name
+    } else if (catName) {
+      // find all posts related to category
+      posts = await Post.find({ categories: {
+        // in method, look at 'categories:' and if inside include this 'catName', find and put inside
+        $in: [catName]
+      }})
+    } else {
+      // if there is no username, catname, fetch all posts
+      posts = await Post.find()
+    }
+    // posts all if successful
+    res.status(200).json(posts)
+  } catch (err) {
+    // if not, response with error
     res.status(500).json(err)
   }
 })
