@@ -7,6 +7,8 @@ const authRoute = require('./routes/auth')
 const userRoute = require('./routes/users')
 const postRoute = require('./routes/posts')
 const categoryRoute = require('./routes/categories')
+// multer allows to upload images (npm install multer)
+const multer = require('multer')
 
 dotenv.config()
 app.use(express.json())
@@ -18,6 +20,27 @@ mongoose.connect(process.env.MONGO_URL, {
 })
   .then(console.log('Connected to MongoDB'))
   .catch((err) => console.log(err))
+
+// indicate images folder
+const storage = multer.diskStorage({
+  // A string or function that determines the destination path for uploaded files.
+  // cb takes care of errors
+  destination: (req, file, cb) => {
+    // first param is null, and second is our destination, which is images folder
+    cb(null, 'images')
+    // A function that determines the name of the uploaded file. If nothing is passed, Multer will generate a 32 character pseudorandom hex string with no extension.
+  }, filename: (req, file, cb) => {
+    // send file to client
+    cb(null, req.body.name)
+  }
+})
+
+// storage is the 'const storage' above
+// method to upload our file
+const upload = multer({storage: storage})
+app.post('/api/upload', upload.single('file'), (req, res) => {
+  res.status(200).json('File has been uploaded')
+})
 
 app.use('/api/auth', authRoute)
 app.use('/api/users', userRoute)
