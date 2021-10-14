@@ -21,6 +21,7 @@ router.post('/signup', async (req, res) => {
     // create success message
     res.status(200).json(user)
   } catch (err) {
+    // error 500 means something is wrong with express server or MongoDB
     res.status(500).json(err)
   }
 })
